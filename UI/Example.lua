@@ -7,7 +7,9 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ユーザー名/リポジトリ名/main/minecraft/UI/ui.lua"))()
+local URL = "https://raw.githubusercontent.com/rpx-jp/New-UI/refs/heads/main/UI/main.lua"
+-- ?t=時刻 を付けるとGitHubのキャッシュを避けられて、更新がすぐ反映される
+local Library = loadstring(game:HttpGet(URL .. "?t=" .. os.time()))()
 
 local Window = Library:CreateWindow({
 	Title = "menu",

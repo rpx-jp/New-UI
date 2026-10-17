@@ -1,8 +1,41 @@
+--[[
+	UI Library v2
+	使い方: local Library = loadstring(game:HttpGet("rawのURL?t=" .. os.time()))()
+	(?t= を付けるとGitHubのキャッシュを避けて、更新がすぐ反映される)
+	使用例は example.lua を参照
+
+	Library:CreateWindow({Title, Subtitle, Size, ToggleKey, Accent})
+	Window:AddTab(name)
+	Tab:AddGroup(name, side)            side = "Left" or "Right"
+
+	Group:AddLabel(text)
+	Group:AddButton({Name, Callback})
+	Group:AddToggle({Name, Default, Flag, Callback})
+	Group:AddSlider({Name, Min, Max, Default, Increment, Suffix, Flag, Callback})
+	Group:AddDropdown({Name, Options, Default, Flag, Callback})
+	Group:AddTextbox({Name, Default, Placeholder, ClearOnFocus, Callback})
+	Group:AddKeybind({Name, Default, Callback, Changed})
+	Group:AddColorPicker({Name, Default, Flag, Callback})
+	Group:AddMultiDropdown({Name, Options, Default = {..}, Flag, Callback})
+	Group:AddSegmented({Name, Options, Default, Flag, Callback})
+	Group:AddStepper({Name, Min, Max, Default, Increment, Flag, Callback})
+	Group:AddProgressBar({Name, Min, Max, Default, Format})   :Set(v)
+	Group:AddDoubleButton({Name1, Callback1, Name2, Callback2})
+	Group:AddParagraph({Title, Content})   :Set(text)
+	Group:AddDivider(text)   Group:AddSpacer(height)
+
+	Library:Notify({Title, Content, Duration, Type})   Type = Info / Success / Warning / Error
+	Library:CreateWatermark({Text, ShowFPS, ShowPing, ShowTime, ShowUser, Position, Draggable})
+		:SetText(t)  :Set("FPS"|"Ping"|"Time"|"User", bool)  :SetVisible(bool)  :Toggle()  :Destroy()
+	Library.Name = ライブラリ名 (ScreenGui名と透かしの初期文字。上の Library 定義で変更)
+	Library.Flags[Flag] で現在の値を取得
+]]
 
 --// Services
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 local TextService = game:GetService("TextService")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
@@ -106,6 +139,12 @@ end
 
 local function IsPress(input)
 	return input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch
+end
+
+-- マウス位置をUIの座標(AbsolutePosition)と同じ基準にそろえる
+-- (GetMouseLocationは画面の一番上から、AbsolutePositionは上バーの下から数えるため)
+local function MouseLocation()
+	return UserInputService:GetMouseLocation() - GuiService:GetGuiInset()
 end
 
 local function Darken(color, amount)
@@ -1072,7 +1111,7 @@ function Library:CreateWindow(opts)
 
 				local dragging = false
 				local function fromMouse()
-					local mx = UserInputService:GetMouseLocation().X
+					local mx = MouseLocation().X
 					set(min + (max - min) * math.clamp((mx - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1))
 				end
 				hit.InputBegan:Connect(function(input)
@@ -2127,13 +2166,13 @@ function Library:CreateWindow(opts)
 
 				local dragSV, dragHue = false, false
 				local function fromSV()
-					local m = UserInputService:GetMouseLocation()
+					local m = MouseLocation()
 					s = math.clamp((m.X - sv.AbsolutePosition.X) / sv.AbsoluteSize.X, 0, 1)
 					v = 1 - math.clamp((m.Y - sv.AbsolutePosition.Y) / sv.AbsoluteSize.Y, 0, 1)
 					update(true)
 				end
 				local function fromHue()
-					local m = UserInputService:GetMouseLocation()
+					local m = MouseLocation()
 					h = math.clamp((m.X - hue.AbsolutePosition.X) / hue.AbsoluteSize.X, 0, 1)
 					update(true)
 				end
