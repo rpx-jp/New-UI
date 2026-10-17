@@ -35,7 +35,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local GuiService = game:GetService("GuiService")
 local TextService = game:GetService("TextService")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
@@ -139,12 +138,6 @@ end
 
 local function IsPress(input)
 	return input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch
-end
-
--- マウス位置をUIの座標(AbsolutePosition)と同じ基準にそろえる
--- (GetMouseLocationは画面の一番上から、AbsolutePositionは上バーの下から数えるため)
-local function MouseLocation()
-	return UserInputService:GetMouseLocation() - GuiService:GetGuiInset()
 end
 
 local function Darken(color, amount)
@@ -504,6 +497,19 @@ function Library:CreateWindow(opts)
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		Parent = PlayerGui,
 	})
+
+	-- 画面左上に置いた基準フレーム。AbsolutePositionを見れば、UI座標と画面座標のずれが実測できる
+	local origin = Create("Frame", {
+		Name = "Origin",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		Active = false,
+		Parent = gui,
+	})
+	-- マウス位置をUIの座標(AbsolutePosition)と同じ基準にそろえる
+	local function MousePos()
+		return UserInputService:GetMouseLocation() + origin.AbsolutePosition
+	end
 
 	local main = Create("CanvasGroup", {
 		Name = "Main",
@@ -1111,7 +1117,7 @@ function Library:CreateWindow(opts)
 
 				local dragging = false
 				local function fromMouse()
-					local mx = MouseLocation().X
+					local mx = MousePos().X
 					set(min + (max - min) * math.clamp((mx - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1))
 				end
 				hit.InputBegan:Connect(function(input)
@@ -2166,13 +2172,13 @@ function Library:CreateWindow(opts)
 
 				local dragSV, dragHue = false, false
 				local function fromSV()
-					local m = MouseLocation()
+					local m = MousePos()
 					s = math.clamp((m.X - sv.AbsolutePosition.X) / sv.AbsoluteSize.X, 0, 1)
 					v = 1 - math.clamp((m.Y - sv.AbsolutePosition.Y) / sv.AbsoluteSize.Y, 0, 1)
 					update(true)
 				end
 				local function fromHue()
-					local m = MouseLocation()
+					local m = MousePos()
 					h = math.clamp((m.X - hue.AbsolutePosition.X) / hue.AbsoluteSize.X, 0, 1)
 					update(true)
 				end
@@ -2264,5 +2270,5 @@ function Library:CreateWindow(opts)
 
 	return Window
 end
--- a
+
 return Library
