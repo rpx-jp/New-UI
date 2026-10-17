@@ -9,7 +9,19 @@ local LocalPlayer = Players.LocalPlayer
 
 local URL = "https://raw.githubusercontent.com/rpx-jp/New-UI/refs/heads/main/UI/main.lua"
 -- ?t=時刻 を付けるとGitHubのキャッシュを避けられて、更新がすぐ反映される
-local Library = loadstring(game:HttpGet(URL .. "?t=" .. os.time()))()
+
+local ok, source = pcall(game.HttpGet, game, URL .. "?t=" .. os.time())
+assert(ok, "ダウンロードに失敗: " .. tostring(source))
+
+local chunk, err = loadstring(source)
+assert(
+	chunk,
+	"ui.luaを読み込めませんでした (URLが違うか、リポジトリがprivateかも)\n"
+		.. "取得した内容の先頭: " .. tostring(source):sub(1, 80) .. "\n"
+		.. "エラー: " .. tostring(err)
+)
+
+local Library = chunk()
 
 local Window = Library:CreateWindow({
 	Title = "menu",
